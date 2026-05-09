@@ -223,9 +223,9 @@ A test consumer repository (set up by Guy after merge, out of scope here) consum
 
 *To be checked off before any production code is written.*
 
-- [ ] `mlugg/setup-zig` — full source — read YYYY-MM-DD HH:MM
-- [ ] GitHub Actions JS metadata syntax docs — read YYYY-MM-DD HH:MM
-- [ ] Forgejo Actions docs — read YYYY-MM-DD HH:MM
+- [x] `mlugg/setup-zig` — full source — read 2026-05-09 09:38
+- [x] GitHub Actions JS metadata syntax docs — read 2026-05-09 09:36
+- [x] Forgejo Actions docs — read 2026-05-09 09:36
 
 ## Execution journal
 
