@@ -2,7 +2,7 @@ import * as fs from 'node:fs/promises';
 import * as os from 'node:os';
 import * as path from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { clearDirContents, dirSize, maybeGc, parseSizeLimit } from '../src/gc.ts';
+import { clearDirContents, dirSize, maybeGc, parseSizeLimit } from '../src/gc.js';
 
 describe('parseSizeLimit', () => {
   it('parses binary unit suffixes', () => {
@@ -39,6 +39,18 @@ describe('parseSizeLimit', () => {
   it('accepts case variations of unit suffix', () => {
     expect(parseSizeLimit('2gib')).toBe(2 * 1024 ** 3);
     expect(parseSizeLimit('500mib')).toBe(500 * 1024 ** 2);
+  });
+
+  it('parses every supported unit', () => {
+    expect(parseSizeLimit('1B')).toBe(1);
+    expect(parseSizeLimit('1KB')).toBe(1000);
+    expect(parseSizeLimit('1KiB')).toBe(1024);
+    expect(parseSizeLimit('1MB')).toBe(1000 ** 2);
+    expect(parseSizeLimit('1MiB')).toBe(1024 ** 2);
+    expect(parseSizeLimit('1GB')).toBe(1000 ** 3);
+    expect(parseSizeLimit('1GiB')).toBe(1024 ** 3);
+    expect(parseSizeLimit('1TB')).toBe(1000 ** 4);
+    expect(parseSizeLimit('1TiB')).toBe(1024 ** 4);
   });
 });
 

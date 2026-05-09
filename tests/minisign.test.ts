@@ -1,7 +1,7 @@
 import { Buffer } from 'node:buffer';
 import { createHash, generateKeyPairSync, randomBytes, sign as nodeSign } from 'node:crypto';
 import { describe, expect, it } from 'vitest';
-import { parseKey, parseSignature, verifySignature } from '../src/minisign.ts';
+import { parseKey, parseSignature, verifySignature } from '../src/minisign.js';
 
 type TestVector = {
   publicKeyB64: string;

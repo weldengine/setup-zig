@@ -1,6 +1,6 @@
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
-import { parseVersion } from './version.ts';
+import { parseVersion } from './version.js';
 
 export const VERSIONS_JSON = 'https://ziglang.org/download/index.json';
 export const MACH_VERSIONS_JSON = 'https://pkg.machengine.org/zig/index.json';

@@ -7,7 +7,7 @@ import {
   MACH_VERSIONS_JSON,
   resolveVersion,
   VERSIONS_JSON,
-} from '../src/resolve.ts';
+} from '../src/resolve.js';
 
 function jsonResponse(body: unknown): Response {
   return new Response(JSON.stringify(body), {

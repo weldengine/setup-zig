@@ -5,7 +5,7 @@ import {
   getZigCacheRestoreKeys,
   getZigCacheSaveKey,
   sanitizeJobName,
-} from '../src/cache.ts';
+} from '../src/cache.js';
 
 describe('getTarballCacheKey', () => {
   it('returns a deterministic namespaced key for the tarball basename', () => {

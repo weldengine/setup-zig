@@ -8,10 +8,10 @@ import {
   getTarballCacheKey,
   getZigCachePrefix,
   getZigCacheRestoreKeys,
-} from './cache.ts';
-import { downloadTarball } from './download.ts';
-import { resolveVersion } from './resolve.ts';
-import { getTarballExt, getTarballName, getZigArch, getZigPlatform } from './version.ts';
+} from './cache.js';
+import { downloadTarball } from './download.js';
+import { resolveVersion } from './resolve.js';
+import { getTarballExt, getTarballName, getZigArch, getZigPlatform } from './version.js';
 
 const DEFAULT_SOURCE = 'github-weldengine-setup-zig';
 

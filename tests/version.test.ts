@@ -6,7 +6,7 @@ import {
   getZigPlatform,
   parseVersion,
   versionLessThan,
-} from '../src/version.ts';
+} from '../src/version.js';
 
 describe('parseVersion', () => {
   it('parses a stable release', () => {

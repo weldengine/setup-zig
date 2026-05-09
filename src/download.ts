@@ -2,7 +2,7 @@ import { Buffer } from 'node:buffer';
 import * as fs from 'node:fs/promises';
 import * as os from 'node:os';
 import * as path from 'node:path';
-import { parseKey, parseSignature, verifySignature, type ParsedKey } from './minisign.ts';
+import { parseKey, parseSignature, verifySignature, type ParsedKey } from './minisign.js';
 
 export const ZIG_PUBLIC_KEY = 'RWSGOq2NVecA2UPNdBUZykf1CCb147pkmdtYxgb3Ti+JO/wCYvhbAb/U';
 

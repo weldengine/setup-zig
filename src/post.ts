@@ -1,8 +1,8 @@
 import * as cache from '@actions/cache';
 import * as core from '@actions/core';
 import * as github from '@actions/github';
-import { getZigCacheSaveKey } from './cache.ts';
-import { maybeGc, parseSizeLimit } from './gc.ts';
+import { getZigCacheSaveKey } from './cache.js';
+import { maybeGc, parseSizeLimit } from './gc.js';
 
 async function post(): Promise<void> {
   try {

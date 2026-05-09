@@ -19,8 +19,8 @@ import {
   downloadTarballWithKey,
   FALLBACK_MIRRORS,
   type DownloadInputs,
-} from '../src/download.ts';
-import type { ParsedKey } from '../src/minisign.ts';
+} from '../src/download.js';
+import type { ParsedKey } from '../src/minisign.js';
 
 type Signer = {
   pubkey: ParsedKey;
