@@ -1,6 +1,6 @@
 # M01 — Initial implementation of weldengine/setup-zig
 
-> **Status:** PLANNED
+> **Status:** ACTIVE
 > **Project:** weldengine/setup-zig (standalone tooling repo, not part of the Weld engine codebase)
 > **Branch:** `feat/M01-initial-implementation`
 > **Tag planned:** `v0.1.0` (mobile tag `v1` posted on the same commit by Guy after merge)
