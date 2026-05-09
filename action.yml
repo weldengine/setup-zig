@@ -1,0 +1,79 @@
+name: 'Setup Zig (weldengine)'
+description: 'Install the Zig compiler in a GitHub Actions or Forgejo Actions workflow, with parallel mirror race and cache preservation.'
+author: 'weldengine'
+branding:
+  icon: 'download'
+  color: 'orange'
+
+inputs:
+  version:
+    description: >
+      Zig version to install. Examples: '0.16.0', '0.16.0-dev.42+abcdef012',
+      '2024.5.0-mach' (Mach nominated), 'master' (latest nightly), 'latest'
+      (latest tagged release). Leave empty to read from build.zig.zon's
+      mach_zig_version or minimum_zig_version field, falling back to 'latest'.
+    required: false
+    default: ''
+  version-file:
+    description: >
+      Path to a build.zig.zon file (relative to GITHUB_WORKSPACE) from which
+      to read the mach_zig_version or minimum_zig_version field. Only used
+      when 'version' is empty. When set explicitly and the file is missing,
+      the action fails. Useful for monorepos where build.zig.zon is not at
+      the workspace root.
+    required: false
+    default: ''
+  mirror:
+    description: >
+      Override the Zig download mirror, e.g. 'https://pkg.machengine.org/zig'.
+      When set, only this mirror is used (no race, no fallback to
+      ziglang.org). 'https://ziglang.org' is rejected to keep load off the
+      official site.
+    required: false
+    default: ''
+  source:
+    description: >
+      Identifier appended as a query string (?source=<value>) to mirror
+      requests, allowing mirror operators to attribute traffic. Defaults to
+      'github-weldengine-setup-zig'. Set to a custom value to identify
+      forks or testing setups.
+    required: false
+    default: ''
+  use-cache:
+    description: >
+      Whether to preserve the .zig-cache directory across workflow runs via
+      @actions/cache. The downloaded tarball is always cached separately.
+    required: true
+    default: 'true'
+  cache-key:
+    description: >
+      Additional component appended to the .zig-cache cache key. When using a
+      matrix strategy, include matrix variables here so each cell has its own
+      cache. Variables that select OS can be omitted (the OS is part of the
+      tarball name and thus already in the key).
+    required: false
+    default: ''
+  cache-size-limit:
+    description: >
+      Maximum size of the .zig-cache directory before contents are purged
+      prior to save. Accepts human-readable values like '2GiB', '500MiB',
+      '1024MB', '1.5GB', or a plain integer (interpreted as bytes). Set to
+      '0' or empty string to disable the GC entirely.
+    required: false
+    default: '2GiB'
+  enforce-version-range:
+    description: >
+      If non-empty, fail the action when the resolved Zig version does not
+      have this major.minor (or major.minor.patch) prefix. Example: '0.16'
+      accepts '0.16.0', '0.16.5', '0.16.0-dev.500+abc', and rejects '0.15.1'.
+    required: false
+    default: ''
+
+outputs:
+  zig-version:
+    description: 'The actual Zig version installed, as reported by `zig version`.'
+
+runs:
+  using: 'node24'
+  main: 'dist/index.js'
+  post: 'dist/post.js'
