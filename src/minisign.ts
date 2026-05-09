@@ -6,11 +6,11 @@
  * Adapted for weldengine/setup-zig: TypeScript types and ESM imports.
  */
 import { Buffer } from 'node:buffer';
-import { createHash, subtle } from 'node:crypto';
+import { createHash, subtle, type webcrypto } from 'node:crypto';
 
 export type ParsedKey = {
   id: Buffer;
-  key: CryptoKey;
+  key: webcrypto.CryptoKey;
 };
 
 export type ParsedSignature = {

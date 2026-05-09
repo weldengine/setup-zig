@@ -56,13 +56,13 @@ export function parseSizeLimit(input: string | undefined): number | null {
 }
 
 export async function dirSize(dirPath: string): Promise<number> {
-  let total = 0;
-  let entries: Awaited<ReturnType<typeof fs.readdir<{ withFileTypes: true; recursive: true }>>>;
+  let entries;
   try {
     entries = await fs.readdir(dirPath, { withFileTypes: true, recursive: true });
   } catch {
     return 0;
   }
+  let total = 0;
   for (const ent of entries) {
     if (!ent.isFile()) continue;
     const p = path.join(ent.parentPath, ent.name);
