@@ -1,0 +1,49 @@
+name: Test (Forgejo)
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  zig-version:
+    name: resolve and run Zig 0.16.0 on default Codeberg runner
+    runs-on: codeberg-tiny-lazy
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Zig
+        id: setup
+        uses: ./
+        with:
+          version: 0.16.0
+
+      - name: Verify zig version
+        shell: bash
+        run: |
+          v="${{ steps.setup.outputs.zig-version }}"
+          if [[ "$v" != "0.16.0" ]]; then
+            echo "Expected 0.16.0, got '$v'"; exit 1
+          fi
+          zig version
+
+  version-file:
+    name: resolve from tests/fixtures/build.zig.zon
+    runs-on: codeberg-tiny-lazy
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Zig from version-file
+        id: setup
+        uses: ./
+        with:
+          version-file: tests/fixtures/build.zig.zon
+
+      - name: Verify resolved version
+        shell: bash
+        run: |
+          v="${{ steps.setup.outputs.zig-version }}"
+          if [[ "$v" != "0.16.0" ]]; then
+            echo "Expected 0.16.0, got '$v'"; exit 1
+          fi

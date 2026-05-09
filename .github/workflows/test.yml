@@ -1,0 +1,139 @@
+name: Test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  matrix:
+    name: ${{ matrix.os }} / ${{ matrix.version }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-14, macos-latest, windows-latest]
+        version: [master, latest, 0.14.1, 0.15.1, 0.16.0]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Zig
+        id: setup
+        uses: ./
+        with:
+          version: ${{ matrix.version }}
+
+      - name: Run zig version
+        run: zig version
+
+      - name: Verify zig-version output is non-empty
+        shell: bash
+        run: |
+          v="${{ steps.setup.outputs.zig-version }}"
+          if [[ -z "$v" ]]; then
+            echo "zig-version output was empty"; exit 1
+          fi
+          echo "Action reported Zig version: $v"
+
+  cache-hit:
+    name: tarball cache hit verification
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Zig (warmup)
+        uses: ./
+        with:
+          version: 0.16.0
+          cache-key: cache-hit-test
+
+      - name: Setup Zig (second run, expect tarball cache hit)
+        uses: ./
+        with:
+          version: 0.16.0
+          cache-key: cache-hit-test
+
+  version-file:
+    name: version-file input resolves from build.zig.zon
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Zig from tests/fixtures/build.zig.zon
+        id: setup
+        uses: ./
+        with:
+          version-file: tests/fixtures/build.zig.zon
+
+      - name: Verify resolved version matches the fixture's minimum_zig_version
+        shell: bash
+        run: |
+          v="${{ steps.setup.outputs.zig-version }}"
+          if [[ "$v" != "0.16.0" ]]; then
+            echo "Expected 0.16.0, got '$v'"; exit 1
+          fi
+
+  enforce-version-range-success:
+    name: enforce-version-range matches resolved version
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./
+        with:
+          version: 0.16.0
+          enforce-version-range: '0.16'
+
+      - run: zig version
+
+  enforce-version-range-failure:
+    name: enforce-version-range rejects mismatched version
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Zig (expected to fail)
+        id: bad
+        continue-on-error: true
+        uses: ./
+        with:
+          version: 0.15.1
+          enforce-version-range: '0.16'
+
+      - name: Verify the action failed with the expected error
+        shell: bash
+        run: |
+          if [[ "${{ steps.bad.outcome }}" != "failure" ]]; then
+            echo "Expected the action to fail; got outcome '${{ steps.bad.outcome }}'"
+            exit 1
+          fi
+
+  custom-mirror:
+    name: custom mirror is used preferentially
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./
+        with:
+          version: 0.16.0
+          mirror: 'https://pkg.machengine.org/zig'
+
+      - run: zig version
+
+  custom-source:
+    name: custom source query string is sent
+    runs-on: ubuntu-latest
+    env:
+      ACTIONS_STEP_DEBUG: 'true'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./
+        with:
+          version: 0.16.0
+          source: github-test-foobar
