@@ -91,19 +91,23 @@ async function fetchJson(url: string): Promise<unknown> {
 
 export async function getMasterVersion(): Promise<string> {
   const versions = await fetchJson(VERSIONS_JSON);
-  if (!isVersionMap(versions)) {
+  if (!isObjectMap(versions)) {
     throw new Error(`Malformed index.json from ${VERSIONS_JSON}`);
   }
   const master = versions.master;
   if (master === undefined) {
     throw new Error(`No 'master' entry in ${VERSIONS_JSON}`);
   }
-  return master.version;
+  const v = (master as { version?: unknown }).version;
+  if (typeof v !== 'string') {
+    throw new Error(`'master' entry in ${VERSIONS_JSON} has no string 'version' field`);
+  }
+  return v;
 }
 
 export async function getLatestVersion(): Promise<string> {
   const versions = await fetchJson(VERSIONS_JSON);
-  if (!isVersionMap(versions)) {
+  if (!isObjectMap(versions)) {
     throw new Error(`Malformed index.json from ${VERSIONS_JSON}`);
   }
   let latestName: string | null = null;
@@ -127,14 +131,18 @@ export async function getLatestVersion(): Promise<string> {
 
 export async function getMachVersion(name: string): Promise<string> {
   const versions = await fetchJson(MACH_VERSIONS_JSON);
-  if (!isVersionMap(versions)) {
+  if (!isObjectMap(versions)) {
     throw new Error(`Malformed index.json from ${MACH_VERSIONS_JSON}`);
   }
   const entry = versions[name];
   if (entry === undefined) {
     throw new Error(`Mach nominated version '${name}' not found`);
   }
-  return entry.version;
+  const v = (entry as { version?: unknown }).version;
+  if (typeof v !== 'string') {
+    throw new Error(`Mach entry '${name}' in ${MACH_VERSIONS_JSON} has no string 'version' field`);
+  }
+  return v;
 }
 
 function isStrictlyNewer(
@@ -147,11 +155,10 @@ function isStrictlyNewer(
   return false;
 }
 
-function isVersionMap(value: unknown): value is Record<string, { version: string }> {
+function isObjectMap(value: unknown): value is Record<string, unknown> {
   if (typeof value !== 'object' || value === null) return false;
   for (const v of Object.values(value)) {
     if (typeof v !== 'object' || v === null) return false;
-    if (typeof (v as { version?: unknown }).version !== 'string') return false;
   }
   return true;
 }

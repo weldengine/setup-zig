@@ -76409,18 +76409,22 @@ async function fetchJson(url) {
 }
 async function getMasterVersion() {
     const versions = await fetchJson(exports.VERSIONS_JSON);
-    if (!isVersionMap(versions)) {
+    if (!isObjectMap(versions)) {
         throw new Error(`Malformed index.json from ${exports.VERSIONS_JSON}`);
     }
     const master = versions.master;
     if (master === undefined) {
         throw new Error(`No 'master' entry in ${exports.VERSIONS_JSON}`);
     }
-    return master.version;
+    const v = master.version;
+    if (typeof v !== 'string') {
+        throw new Error(`'master' entry in ${exports.VERSIONS_JSON} has no string 'version' field`);
+    }
+    return v;
 }
 async function getLatestVersion() {
     const versions = await fetchJson(exports.VERSIONS_JSON);
-    if (!isVersionMap(versions)) {
+    if (!isObjectMap(versions)) {
         throw new Error(`Malformed index.json from ${exports.VERSIONS_JSON}`);
     }
     let latestName = null;
@@ -76443,14 +76447,18 @@ async function getLatestVersion() {
 }
 async function getMachVersion(name) {
     const versions = await fetchJson(exports.MACH_VERSIONS_JSON);
-    if (!isVersionMap(versions)) {
+    if (!isObjectMap(versions)) {
         throw new Error(`Malformed index.json from ${exports.MACH_VERSIONS_JSON}`);
     }
     const entry = versions[name];
     if (entry === undefined) {
         throw new Error(`Mach nominated version '${name}' not found`);
     }
-    return entry.version;
+    const v = entry.version;
+    if (typeof v !== 'string') {
+        throw new Error(`Mach entry '${name}' in ${exports.MACH_VERSIONS_JSON} has no string 'version' field`);
+    }
+    return v;
 }
 function isStrictlyNewer(a, b) {
     if (a.major !== b.major)
@@ -76461,13 +76469,11 @@ function isStrictlyNewer(a, b) {
         return a.patch > b.patch;
     return false;
 }
-function isVersionMap(value) {
+function isObjectMap(value) {
     if (typeof value !== 'object' || value === null)
         return false;
     for (const v of Object.values(value)) {
         if (typeof v !== 'object' || v === null)
-            return false;
-        if (typeof v.version !== 'string')
             return false;
     }
     return true;

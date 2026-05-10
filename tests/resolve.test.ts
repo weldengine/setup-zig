@@ -261,6 +261,44 @@ describe('resolveVersion', () => {
       ),
     ).rejects.toThrow(/Failed to fetch.*HTTP 500/);
   });
+
+  it("handles ziglang.org's real index.json shape (tagged entries without a 'version' field)", async () => {
+    // Real shape: only 'master' (and very recent releases) carry a string
+    // 'version'; older tagged entries carry 'date', 'docs', 'src', etc. — and
+    // the key IS the version. The previous strict isVersionMap rejected this
+    // entirely; we now relax the guard to require only object-of-objects.
+    vi.spyOn(globalThis, 'fetch').mockImplementation(async () => {
+      return jsonResponse({
+        master: { version: '0.17.0-dev.42+abcdef012', date: '2026-05-09', docs: 'https://x' },
+        '0.16.0': { version: '0.16.0', date: '2026-04-01' },
+        '0.15.1': { date: '2025-10-01', docs: 'https://x', src: { tarball: 'https://y' } },
+        '0.14.1': { date: '2025-04-01' },
+      });
+    });
+
+    expect(
+      await resolveVersion(
+        { version: 'master', versionFile: '', enforceVersionRange: '' },
+        { cwd: tmpDir },
+      ),
+    ).toBe('0.17.0-dev.42+abcdef012');
+
+    vi.restoreAllMocks();
+    vi.spyOn(globalThis, 'fetch').mockImplementation(async () => {
+      return jsonResponse({
+        master: { version: '0.17.0-dev.42+abcdef012', date: '2026-05-09' },
+        '0.16.0': { version: '0.16.0', date: '2026-04-01' },
+        '0.15.1': { date: '2025-10-01' },
+        '0.14.1': { date: '2025-04-01' },
+      });
+    });
+    expect(
+      await resolveVersion(
+        { version: 'latest', versionFile: '', enforceVersionRange: '' },
+        { cwd: tmpDir },
+      ),
+    ).toBe('0.16.0');
+  });
 });
 
 describe('enforceVersionPrefix', () => {
