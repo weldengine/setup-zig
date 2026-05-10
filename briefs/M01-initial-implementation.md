@@ -242,12 +242,16 @@ A test consumer repository (set up by Guy after merge, out of scope here) consum
 - 2026-05-10 02:00 — Step 3g: GitHub Actions test.yml (4 OS × 5 Zig versions = 20 matrix jobs + 6 dedicated jobs for cache-hit, version-file, enforce-version-range success/failure, custom mirror, custom source) and lint.yml (typecheck + eslint + prettier + dist reproducibility check); Forgejo test.yml on codeberg-tiny-lazy.
 - 2026-05-10 02:30 — Step 3h: README.md (quick start + inputs/outputs tables + how-it-works + differences-from-mlugg + Forgejo compat + acknowledgements); examples/{minimal,monorepo,matrix}.yml.
 - 2026-05-10 02:48 — Step 4 validation: 87 tests passing, coverage 96.81/91.81 (above 90/85 thresholds on every module), eslint clean, prettier clean, dist/ reproducible byte-for-byte.
+- 2026-05-10 03:30 — Step 5: pushed branch (15 commits), opened PR #1 to main with title `M01 / setup-zig / Initial implementation`. Brief Status → CLOSED, Closing date 2026-05-10.
+- 2026-05-10 04:00 — Post-close addendum: added `.github/workflows/release.yml` per Guy's request (Cas 3 verbal). Workflow auto-tags and releases on `workflow_run` of Lint succeeding on `main`, gated by package.json version vs existing tags. Documented in Acted deviations.
 
 ## Acted deviations
 
 *Modifications of the FROZEN SECTION made during the milestone after a Claude.ai round-trip. If empty at the end of the milestone: nominal case.*
 
-(none — nominal case. Three minor scaffolding paths outside the brief's "Files to create" list were added without a Claude.ai round-trip, but they introduce no feature scope: `.nvmrc` (pins Node 24 for contributors), `.prettierignore` (keeps prettier off `dist/`, `briefs/`, `.claude/`), and `briefs/` itself (the brief's own home, mandated by the protocol step 1). The first two are pure tooling scaffolding; the third is mandated by the protocol.)
+- **Scaffolding only (no feature scope):** Three minor paths outside the brief's "Files to create" list were added without a Claude.ai round-trip: `.nvmrc` (pins Node 24 for contributors), `.prettierignore` (keeps prettier off `dist/`, `briefs/`, `.claude/`), and `briefs/` itself (the brief's own home, mandated by the protocol step 1). The first two are pure tooling scaffolding; the third is mandated by the protocol.
+
+- **Post-close addendum (Cas 3 verbal, 2026-05-10):** added `.github/workflows/release.yml` after the milestone was already closed and PR #1 opened. Triggered on `workflow_run` of `Lint` after a push to `main`: reads `package.json` version, creates an annotated tag `v$version` if it does not already exist, and opens a GitHub Release with auto-generated notes. Decision recorded via `AskUserQuestion` in-session (option "Tag auto basé sur package.json.version"). Strictly this extends scope (the brief listed three CI workflows: `test.yml`, `lint.yml`, `.forgejo/workflows/test.yml` — no release workflow) and the brief's Conventions section says "Mobile tag `v1` posted on the same commit by Guy after merge", which the addendum does not automate. Carried into PR #1 as an extra commit rather than a new milestone, on Guy's explicit request.
 
 ## Blockers encountered
 
