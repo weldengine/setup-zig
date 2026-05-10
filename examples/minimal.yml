@@ -1,0 +1,17 @@
+# Minimal usage: read version from build.zig.zon at the workspace root,
+# fall back to the latest tagged release if no build.zig.zon is found.
+
+name: build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: weldengine/setup-zig@v1
+      - run: zig build test

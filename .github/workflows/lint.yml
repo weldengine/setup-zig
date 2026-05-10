@@ -1,0 +1,57 @@
+name: Lint
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    name: typecheck, eslint, prettier, dist reproducibility
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - run: npm ci
+
+      - run: npm run typecheck
+
+      - run: npm run lint
+
+      - run: npm run format:check
+
+      - name: Verify committed dist/ matches a fresh rebuild
+        shell: bash
+        run: |
+          mv dist dist.committed
+          npm run build
+          if ! diff -r dist dist.committed > /dev/null; then
+            echo "::error::Committed dist/ differs from a fresh rebuild. Run 'npm run build' before pushing."
+            diff -r dist dist.committed | head -50 || true
+            exit 1
+          fi
+          echo "dist/ is reproducible — matches the freshly-built output."
+
+  test:
+    name: vitest unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - run: npm ci
+
+      - run: npm test

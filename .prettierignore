@@ -1,0 +1,7 @@
+dist/
+dist-tmp/
+node_modules/
+coverage/
+briefs/
+package-lock.json
+.claude/

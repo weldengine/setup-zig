@@ -1,0 +1,8 @@
+* text=auto eol=lf
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+dist/* linguist-generated=true
+dist/* -diff
+dist/* -text
+package-lock.json -diff

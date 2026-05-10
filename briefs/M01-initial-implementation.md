@@ -1,12 +1,12 @@
 # M01 — Initial implementation of weldengine/setup-zig
 
-> **Status:** ACTIVE
+> **Status:** CLOSED
 > **Project:** weldengine/setup-zig (standalone tooling repo, not part of the Weld engine codebase)
 > **Branch:** `feat/M01-initial-implementation`
 > **Tag planned:** `v0.1.0` (mobile tag `v1` posted on the same commit by Guy after merge)
 > **Dependencies:** none (new repository)
 > **Opening date:** 2026-05-08
-> **Closing date:** —
+> **Closing date:** 2026-05-10
 
 ---
 
@@ -231,26 +231,53 @@ A test consumer repository (set up by Guy after merge, out of scope here) consum
 
 *One entry per logical work sequence. Chronological. 1-3 lines per entry.*
 
-- YYYY-MM-DD HH:MM — <summary>
+- 2026-05-09 09:30 — Read external references (mlugg/setup-zig clone in scratch dir, GitHub Actions JS docs, Forgejo Actions docs). Identified the format-flip bug at `versionLessThan(0.15.0-dev.500, 0.14.1)` in mlugg's logic; chose to preserve verbatim per "minimal changes" mandate, since affected dev versions are short-lived.
+- 2026-05-09 09:38 — Step 1: created branch, copied brief verbatim (restoring Unicode em-dashes / arrows / ≥ / × that arrived mojibaked in transit).
+- 2026-05-09 09:39 — Step 2: ticked Specs read, status PLANNED → ACTIVE.
+- 2026-05-09 09:42 — Hit a deployment-config blocker: GitHub auto-set default_branch to feat/M01 (only ref pushed); ruleset 16166702 'main protection' targets ~DEFAULT_BRANCH, so it protected the feature branch and blocked subsequent pushes. Resolved per Guy's option-A: pushed HEAD to main, switched default to main via gh api PATCH, ruleset now correctly protects main and the feature branch is free.
+- 2026-05-09 09:50 — Step 3a bootstrap: package.json, tsconfig, vitest.config, eslint flat config, prettier, .gitignore, .gitattributes, LICENSE, .nvmrc, .prettierignore. Used Node 24.15 via nvm. Two-stage ncc build (src/main → dist, src/post → dist-tmp + rename) to work around ncc not supporting custom output filenames.
+- 2026-05-09 11:25 — Step 3b: src/version.ts + 21 tests (100/95 stmt/branch); cache.ts + 9 tests (100/100); gc.ts + 15 tests (95/93); minisign.ts + 6 tests (90/86) — minisign ported verbatim from mlugg with explicit attribution header.
+- 2026-05-09 12:50 — Step 3c: resolve.ts + 22 tests (96/88); download.ts + 14 tests (100/97). Race uses Promise.any over fetch with shared AbortController. downloadTarballWithKey exported as the testable lower-layer (downloadTarball wraps it with the hardcoded Zig pubkey).
+- 2026-05-10 01:31 — Step 3d-f: main.ts/post.ts orchestration; action.yml manifest; ncc build produces dist/index.js (~4.3 MB) + dist/post.js (~4.4 MB) + dist/licenses.txt (60 KB). Switched imports from './foo.ts' to './foo.js' (NodeNext convention, required since ncc cannot use allowImportingTsExtensions).
+- 2026-05-10 02:00 — Step 3g: GitHub Actions test.yml (4 OS × 5 Zig versions = 20 matrix jobs + 6 dedicated jobs for cache-hit, version-file, enforce-version-range success/failure, custom mirror, custom source) and lint.yml (typecheck + eslint + prettier + dist reproducibility check); Forgejo test.yml on codeberg-tiny-lazy.
+- 2026-05-10 02:30 — Step 3h: README.md (quick start + inputs/outputs tables + how-it-works + differences-from-mlugg + Forgejo compat + acknowledgements); examples/{minimal,monorepo,matrix}.yml.
+- 2026-05-10 02:48 — Step 4 validation: 87 tests passing, coverage 96.81/91.81 (above 90/85 thresholds on every module), eslint clean, prettier clean, dist/ reproducible byte-for-byte.
+- 2026-05-10 03:30 — Step 5: pushed branch (15 commits), opened PR #1 to main with title `M01 / setup-zig / Initial implementation`. Brief Status → CLOSED, Closing date 2026-05-10.
+- 2026-05-10 04:00 — Post-close addendum: added `.github/workflows/release.yml` per Guy's request (Cas 3 verbal). Workflow auto-tags and releases on `workflow_run` of Lint succeeding on `main`, gated by package.json version vs existing tags. Documented in Acted deviations.
 
 ## Acted deviations
 
 *Modifications of the FROZEN SECTION made during the milestone after a Claude.ai round-trip. If empty at the end of the milestone: nominal case.*
 
-- <commit SHA> — <deviation summary and rationale>
+- **Scaffolding only (no feature scope):** Three minor paths outside the brief's "Files to create" list were added without a Claude.ai round-trip: `.nvmrc` (pins Node 24 for contributors), `.prettierignore` (keeps prettier off `dist/`, `briefs/`, `.claude/`), and `briefs/` itself (the brief's own home, mandated by the protocol step 1). The first two are pure tooling scaffolding; the third is mandated by the protocol.
+
+- **Post-close addendum (Cas 3 verbal, 2026-05-10):** added `.github/workflows/release.yml` after the milestone was already closed and PR #1 opened. Triggered on `workflow_run` of `Lint` after a push to `main`: reads `package.json` version, creates an annotated tag `v$version` if it does not already exist, and opens a GitHub Release with auto-generated notes. Decision recorded via `AskUserQuestion` in-session (option "Tag auto basé sur package.json.version"). Strictly this extends scope (the brief listed three CI workflows: `test.yml`, `lint.yml`, `.forgejo/workflows/test.yml` — no release workflow) and the brief's Conventions section says "Mobile tag `v1` posted on the same commit by Guy after merge", which the addendum does not automate. Carried into PR #1 as an extra commit rather than a new milestone, on Guy's explicit request.
 
 ## Blockers encountered
 
 *Blockers that required a Claude.ai round-trip. If 2+ distinct blockers: re-scope signal.*
 
-- <blocker summary> — resolved by <commit SHA> or <reference to Claude.ai conversation>
+- (none required a Claude.ai round-trip.) One operational issue (Cas 1) was tracked here for transparency: GitHub auto-set the default branch to `feat/M01-initial-implementation` because that was the only ref pushed to the empty repo, which caused the `main protection` ruleset (ref_name include `~DEFAULT_BRANCH`) to protect the feature branch and reject subsequent pushes. Resolved by pushing local HEAD to `main` and switching default branch to `main` via `gh api PATCH`. Outcome: `main` and `feat/M01-initial-implementation` both initially point at the same commit (3c423d7); the feature branch then accumulated all the implementation work on top.
 
 ## Closing notes
 
 *To be filled at Status → CLOSED, just before opening the PR.*
 
-- **What worked:**
-- **What deviated from the original spec:**
+- **What worked:** TypeScript reimplementation flowed cleanly. Pure modules (version, cache, minisign, gc) built on top of mlugg's logic verbatim where possible (especially the minisign port, which preserved the trio of Ed25519/BLAKE2b primitives), then I/O modules layered on top with fetch-based mocking via `vi.spyOn(globalThis, 'fetch')`. Parallel mirror race via `Promise.any` + shared `AbortController` fell out naturally and is testable without ever hitting the network. The `downloadTarball` / `downloadTarballWithKey` split kept the orchestration tied to the hardcoded Zig public key while still allowing tests to inject a generated test key. ncc bundling produced a single auditable file per entry point.
+- **What deviated from the original spec:** Nothing in the FROZEN SECTION. Three minor scaffolding paths added outside the explicit "Files to create" list, captured in Acted deviations: `.nvmrc`, `.prettierignore`, and the inherently-mandated `briefs/` directory. One soft semantic decision documented in code: `enforce-version-range` is implemented as token-prefix match on the version's `major.minor[.patch]` (stripped of `-dev` suffix), since the brief gave AC examples but not a formal grammar.
 - **What needs explicit review attention:**
-- **Final measurements:** (test count, coverage %, bundle sizes for `dist/index.js` and `dist/post.js`, total LOC under `src/`)
+  - `src/minisign.ts` line 78 (`sigBuf = sigBuf.subarray(sigInfoEnd + 1);`) preserves a known mlugg upstream issue where the trailing-bytes guard is moot due to a stale offset reference. Carried verbatim per "minimal changes" mandate; flagged here for visibility. A future hardening would compute `globalSigEnd + 1` instead — out of scope for M01.
+  - The CI matrix uses Zig versions `master`, `latest`, `0.14.1`, `0.15.1`, `0.16.0`. If `0.16.0` is not yet a real Zig release at run time, those rows will fail until either Zig ships 0.16.0 or the matrix is updated.
+  - The `cache-size-limit` parser intentionally rejects bare floats (`'1.5'`) — units are mandatory unless the value is a plain integer. Unit-less floats throw a clear "Invalid format" error.
+  - `tests/fixtures/build.zig.zon` declares `minimum_zig_version = "0.16.0"`, which the CI version-file job verifies resolves to exactly that version. Bumping the matrix's pinned 0.16.0 here would also require bumping the fixture.
+- **Final measurements:**
+  - 87 unit test cases across 6 test files (brief required ≥ 36).
+  - Coverage 96.81 % statements / 91.81 % branches / 100 % functions / 96.81 % lines (per-module floor 90.47 % statements, 86.36 % branches — minisign — both above the 90/85 thresholds).
+  - `dist/index.js` 4 351 301 bytes; `dist/post.js` 4 433 650 bytes; `dist/licenses.txt` 60 139 bytes.
+  - Total LOC under `src/`: 877.
+  - Branch has 14 commits ahead of `main` at close time (squash-merge will collapse them).
 - **Residual risks / intentional technical debt:**
+  - The minisign-trailing-bytes upstream-mlugg quirk (see review attention above).
+  - `dist/` reproducibility depends on the local Node version producing identical ncc output to CI's Node 24. If CI runs a slightly different Node 24 patch, the lint reproducibility job may flag spurious diffs. Mitigation: contributors run `npm run build` on Node 24 (the `.nvmrc` pins this).
+  - The `source` query string default `'github-weldengine-setup-zig'` is hard-coded; if mirror operators ever ask Weld to switch identifiers, that's a config change.
+  - The hardcoded fallback mirror list (13 entries) is a snapshot of mlugg's list as of the design conversation. It will drift over time; updates require a version bump.

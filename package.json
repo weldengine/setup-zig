@@ -1,0 +1,38 @@
+{
+  "name": "setup-zig",
+  "version": "0.1.0",
+  "description": "Install the Zig compiler in a GitHub Actions or Forgejo Actions workflow, with parallel mirror race and cache preservation.",
+  "private": true,
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "clean": "node -e \"const fs=require('fs');fs.rmSync('dist',{recursive:true,force:true});fs.rmSync('dist-tmp',{recursive:true,force:true})\"",
+    "build:main": "ncc build src/main.ts -o dist --license licenses.txt",
+    "build:post": "ncc build src/post.ts -o dist-tmp",
+    "build:finalize": "node -e \"const fs=require('fs');fs.renameSync('dist-tmp/index.js','dist/post.js');fs.rmSync('dist-tmp',{recursive:true,force:true})\"",
+    "build": "npm run clean && npm run build:main && npm run build:post && npm run build:finalize",
+    "test": "vitest run --coverage",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "format:check": "prettier --check ."
+  },
+  "dependencies": {
+    "@actions/cache": "^5.0.0",
+    "@actions/core": "^1.11.1",
+    "@actions/exec": "^1.1.1",
+    "@actions/github": "^6.0.1",
+    "@actions/tool-cache": "^2.0.2"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "@vercel/ncc": "^0.38.3",
+    "@vitest/coverage-v8": "^2.1.0",
+    "eslint": "^9.13.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.6.3",
+    "typescript-eslint": "^8.12.0",
+    "vitest": "^2.1.0"
+  }
+}

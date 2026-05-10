@@ -1,0 +1,27 @@
+# Matrix usage: each (target, profile) cell gets its own .zig-cache
+# entry by including those variables in cache-key. The OS is already
+# encoded in the tarball name and so does not need to appear in cache-key.
+
+name: matrix
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-14, windows-latest]
+        target: [x86_64-linux, aarch64-macos]
+        profile: [Debug, ReleaseFast]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: weldengine/setup-zig@v1
+        with:
+          version: 0.16.0
+          cache-key: ${{ matrix.target }}-${{ matrix.profile }}
+      - run: zig build -Dtarget=${{ matrix.target }} -Doptimize=${{ matrix.profile }}
