@@ -265,19 +265,29 @@ describe('resolveVersion', () => {
 
 describe('enforceVersionPrefix', () => {
   it('matches when prefix is the major.minor of the version', () => {
-    expect(() => { enforceVersionPrefix('0.16.0', '0.16'); }).not.toThrow();
-    expect(() => { enforceVersionPrefix('0.16.5', '0.16'); }).not.toThrow();
+    expect(() => {
+      enforceVersionPrefix('0.16.0', '0.16');
+    }).not.toThrow();
+    expect(() => {
+      enforceVersionPrefix('0.16.5', '0.16');
+    }).not.toThrow();
   });
 
   it('strips dev suffix before comparison', () => {
-    expect(() => { enforceVersionPrefix('0.16.0-dev.500+abc', '0.16'); }).not.toThrow();
+    expect(() => {
+      enforceVersionPrefix('0.16.0-dev.500+abc', '0.16');
+    }).not.toThrow();
   });
 
   it('rejects mismatched minor', () => {
-    expect(() => { enforceVersionPrefix('0.15.1', '0.16'); }).toThrow();
+    expect(() => {
+      enforceVersionPrefix('0.15.1', '0.16');
+    }).toThrow();
   });
 
   it('rejects mismatched major', () => {
-    expect(() => { enforceVersionPrefix('1.0.0', '0.16'); }).toThrow();
+    expect(() => {
+      enforceVersionPrefix('1.0.0', '0.16');
+    }).toThrow();
   });
 });

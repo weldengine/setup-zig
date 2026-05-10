@@ -102,4 +102,73 @@ describe('minisign verification', () => {
     const bad = Buffer.from('something else: hi\n\n\n\n');
     expect(() => parseSignature(bad)).toThrow(/bad untrusted comment header/);
   });
+
+  it('rejects a signature whose trusted comment header is missing', async () => {
+    const payload = Buffer.from('zig tarball');
+    const tc = `timestamp:1700000000\tfile:zig.tar.xz\thashed`;
+    const vec = buildTestVector(payload, tc);
+
+    // Replace the literal "\ntrusted comment: " header with an unrecognized prefix.
+    // Anchored to the leading newline so we don't accidentally match inside
+    // "untrusted comment: " on the very first line.
+    const tampered = Buffer.from(
+      vec.signatureFile.toString('utf-8').replace('\ntrusted comment: ', '\nsomething else:   '),
+    );
+
+    expect(() => parseSignature(tampered)).toThrow(/bad trusted comment header/);
+  });
+
+  it('returns false when the signature uses an unsupported algorithm', async () => {
+    const payload = Buffer.from('zig tarball');
+    const tc = `timestamp:1700000000\tfile:zig.tar.xz\thashed`;
+    const vec = buildTestVector(payload, tc);
+
+    const key = await parseKey(vec.publicKeyB64);
+    const sig = parseSignature(vec.signatureFile);
+
+    // Forge an unknown algorithm prefix ('XX') in the parsed signature.
+    const fakeAlgo = Buffer.from('XX');
+    const tampered = { ...sig, algorithm: fakeAlgo };
+
+    expect(await verifySignature(key, tampered, payload)).toBe(false);
+  });
+
+  it('accepts the raw "Ed" (unhashed) algorithm mode', async () => {
+    // This branch is unused by Zig (which always uses 'ED'/hashed), but the verifier
+    // supports it for spec completeness; cover it here so it does not bit-rot.
+    const {
+      generateKeyPairSync,
+      randomBytes,
+      sign,
+      subtle: subtleApi,
+    } = await import('node:crypto');
+    const { publicKey, privateKey } = generateKeyPairSync('ed25519');
+    const publicKeyDer = publicKey.export({ format: 'der', type: 'spki' });
+    const publicKeyRaw = publicKeyDer.subarray(publicKeyDer.length - 32);
+    const keyId = randomBytes(8);
+    const cryptoKey = await subtleApi.importKey('raw', publicKeyRaw, 'Ed25519', false, ['verify']);
+
+    const payload = Buffer.from('hello');
+    const signatureRaw = sign(null, payload, privateKey);
+
+    const trustedComment = `timestamp:1\tfile:foo\thashed`;
+    const globalSig = sign(
+      null,
+      Buffer.concat([signatureRaw, Buffer.from(trustedComment)]),
+      privateKey,
+    );
+
+    const ok = await verifySignature(
+      { id: keyId, key: cryptoKey },
+      {
+        algorithm: Buffer.from('Ed'),
+        keyId,
+        signature: signatureRaw,
+        trustedComment: Buffer.from(trustedComment),
+        globalSignature: globalSig,
+      },
+      payload,
+    );
+    expect(ok).toBe(true);
+  });
 });
