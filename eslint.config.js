@@ -9,6 +9,8 @@ export default tseslint.config(
       'coverage/**',
       'examples/**',
       '*.md',
+      'eslint.config.js',
+      'vitest.config.ts',
     ],
   },
   ...tseslint.configs.strictTypeChecked,
@@ -27,17 +29,11 @@ export default tseslint.config(
     },
   },
   {
-    files: ['eslint.config.js', 'vitest.config.ts'],
-    languageOptions: {
-      parserOptions: {
-        projectService: false,
-        project: null,
-      },
-    },
+    files: ['tests/**/*.ts'],
     rules: {
-      '@typescript-eslint/no-unsafe-assignment': 'off',
-      '@typescript-eslint/no-unsafe-member-access': 'off',
-      '@typescript-eslint/no-unsafe-call': 'off',
+      '@typescript-eslint/require-await': 'off',
+      '@typescript-eslint/no-base-to-string': 'off',
+      '@typescript-eslint/restrict-template-expressions': 'off',
     },
   },
 );

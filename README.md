@@ -14,21 +14,21 @@ By default the action reads `minimum_zig_version` (or `mach_zig_version`) from `
 
 ## Inputs
 
-| Input | Default | Description |
-| --- | --- | --- |
-| `version` | `''` | Explicit version. Examples: `0.16.0`, `0.16.0-dev.42+abcdef012`, `2024.5.0-mach`, `master` (latest nightly), `latest` (latest tagged). Empty = read from `build.zig.zon`, fallback `latest`. |
-| `version-file` | `''` | Path to a `build.zig.zon` (relative to `GITHUB_WORKSPACE`). Only used when `version` is empty. **When set explicitly and the file is missing, the action fails** (unlike the implicit default-path lookup, which silently falls back to `latest`). |
-| `mirror` | `''` | Override the Zig download mirror. When set, no race and no `ziglang.org` fallback. `https://ziglang.org` is rejected. |
-| `source` | `'github-weldengine-setup-zig'` | Identifier appended as `?source=<value>` to mirror requests so operators can attribute traffic. |
-| `use-cache` | `'true'` | Whether to preserve `.zig-cache` across runs via `@actions/cache`. The downloaded tarball is cached separately regardless. |
-| `cache-key` | `''` | Extra component appended to the `.zig-cache` cache key. Use this to keep matrix cells from sharing a single cache. OS variables can be omitted (the OS is already encoded in the tarball name). |
-| `cache-size-limit` | `'2GiB'` | Max size of `.zig-cache` before contents are purged prior to save. Accepts `2GiB`, `500MiB`, `1024MB`, `1.5GB`, plain integers (bytes), or `0` / empty to disable the GC. |
-| `enforce-version-range` | `''` | If non-empty, fail when the resolved version does not have this `major.minor` (or `major.minor.patch`) prefix. Example: `0.16` accepts `0.16.0`, `0.16.5`, `0.16.0-dev.500+abc`, rejects `0.15.1`. |
+| Input                   | Default                         | Description                                                                                                                                                                                                                                        |
+| ----------------------- | ------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `version`               | `''`                            | Explicit version. Examples: `0.16.0`, `0.16.0-dev.42+abcdef012`, `2024.5.0-mach`, `master` (latest nightly), `latest` (latest tagged). Empty = read from `build.zig.zon`, fallback `latest`.                                                       |
+| `version-file`          | `''`                            | Path to a `build.zig.zon` (relative to `GITHUB_WORKSPACE`). Only used when `version` is empty. **When set explicitly and the file is missing, the action fails** (unlike the implicit default-path lookup, which silently falls back to `latest`). |
+| `mirror`                | `''`                            | Override the Zig download mirror. When set, no race and no `ziglang.org` fallback. `https://ziglang.org` is rejected.                                                                                                                              |
+| `source`                | `'github-weldengine-setup-zig'` | Identifier appended as `?source=<value>` to mirror requests so operators can attribute traffic.                                                                                                                                                    |
+| `use-cache`             | `'true'`                        | Whether to preserve `.zig-cache` across runs via `@actions/cache`. The downloaded tarball is cached separately regardless.                                                                                                                         |
+| `cache-key`             | `''`                            | Extra component appended to the `.zig-cache` cache key. Use this to keep matrix cells from sharing a single cache. OS variables can be omitted (the OS is already encoded in the tarball name).                                                    |
+| `cache-size-limit`      | `'2GiB'`                        | Max size of `.zig-cache` before contents are purged prior to save. Accepts `2GiB`, `500MiB`, `1024MB`, `1.5GB`, plain integers (bytes), or `0` / empty to disable the GC.                                                                          |
+| `enforce-version-range` | `''`                            | If non-empty, fail when the resolved version does not have this `major.minor` (or `major.minor.patch`) prefix. Example: `0.16` accepts `0.16.0`, `0.16.5`, `0.16.0-dev.500+abc`, rejects `0.15.1`.                                                 |
 
 ## Outputs
 
-| Output | Description |
-| --- | --- |
+| Output        | Description                                                     |
+| ------------- | --------------------------------------------------------------- |
 | `zig-version` | The actual Zig version installed, as reported by `zig version`. |
 
 ## How it works

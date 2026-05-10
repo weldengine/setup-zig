@@ -9,17 +9,17 @@ const VERSION_RE = /^(?<major>\d+)\.(?<minor>\d+)\.(?<patch>\d+)(?:-dev\.(?<dev>
 
 export function parseVersion(str: string): Version | null {
   const match = VERSION_RE.exec(str);
-  if (match === null || !match.groups) return null;
+  if (!match?.groups) return null;
   const groups = match.groups;
-  const major = groups['major'];
-  const minor = groups['minor'];
-  const patch = groups['patch'];
+  const major = groups.major;
+  const minor = groups.minor;
+  const patch = groups.patch;
   if (major === undefined || minor === undefined || patch === undefined) return null;
   return {
     major: parseInt(major, 10),
     minor: parseInt(minor, 10),
     patch: parseInt(patch, 10),
-    dev: groups['dev'] === undefined ? null : parseInt(groups['dev'], 10),
+    dev: groups.dev === undefined ? null : parseInt(groups.dev, 10),
   };
 }
 
@@ -27,8 +27,8 @@ export function versionLessThan(curVer: string, minVer: string): boolean {
   const cur = parseVersion(curVer);
   const min = parseVersion(minVer);
   if (cur === null || min === null) return false;
-  const curDev = cur.dev === null ? Infinity : cur.dev;
-  const minDev = min.dev === null ? Infinity : min.dev;
+  const curDev = cur.dev ?? Infinity;
+  const minDev = min.dev ?? Infinity;
 
   if (cur.major !== min.major) return cur.major < min.major;
   if (cur.minor !== min.minor) return cur.minor < min.minor;

@@ -4,11 +4,7 @@ import * as cache from '@actions/cache';
 import * as core from '@actions/core';
 import * as exec from '@actions/exec';
 import * as tc from '@actions/tool-cache';
-import {
-  getTarballCacheKey,
-  getZigCachePrefix,
-  getZigCacheRestoreKeys,
-} from './cache.js';
+import { getTarballCacheKey, getZigCachePrefix, getZigCacheRestoreKeys } from './cache.js';
 import { downloadTarball } from './download.js';
 import { resolveVersion } from './resolve.js';
 import { getTarballExt, getTarballName, getZigArch, getZigPlatform } from './version.js';
@@ -40,7 +36,7 @@ async function main(): Promise<void> {
     const tarballFilename = `${tarballName}${tarballExt}`;
 
     const tarballCacheKey = getTarballCacheKey(tarballFilename);
-    const runnerTemp = process.env['RUNNER_TEMP'] ?? os.tmpdir();
+    const runnerTemp = process.env.RUNNER_TEMP ?? os.tmpdir();
     const tarballPath = path.join(runnerTemp, tarballFilename);
 
     let usedTarballPath: string;
@@ -82,10 +78,7 @@ async function main(): Promise<void> {
     core.info(`Installed Zig version: ${installedVersion}`);
     core.setOutput('zig-version', installedVersion);
 
-    const zigCachePath = path.join(
-      process.env['GITHUB_WORKSPACE'] ?? process.cwd(),
-      '.zig-cache',
-    );
+    const zigCachePath = path.join(process.env.GITHUB_WORKSPACE ?? process.cwd(), '.zig-cache');
     core.exportVariable('ZIG_GLOBAL_CACHE_DIR', zigCachePath);
     core.exportVariable('ZIG_LOCAL_CACHE_DIR', zigCachePath);
 
@@ -94,7 +87,7 @@ async function main(): Promise<void> {
     core.saveState('cache-prefix', '');
 
     if (useCache) {
-      const jobName = process.env['GITHUB_JOB'] ?? 'job';
+      const jobName = process.env.GITHUB_JOB ?? 'job';
       const cachePrefix = getZigCachePrefix(jobName, tarballName, cacheKey);
       core.info(`Restoring Zig cache with prefix '${cachePrefix}'`);
       const hit = await cache.restoreCache(

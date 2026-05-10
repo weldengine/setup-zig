@@ -109,12 +109,7 @@ export async function verifySignature(
 
   const globalSignedContent = Buffer.concat([signature.signature, signature.trustedComment]);
   if (
-    !(await subtle.verify(
-      'Ed25519',
-      pubkey.key,
-      signature.globalSignature,
-      globalSignedContent,
-    ))
+    !(await subtle.verify('Ed25519', pubkey.key, signature.globalSignature, globalSignedContent))
   ) {
     return false;
   }

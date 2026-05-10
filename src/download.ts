@@ -163,8 +163,10 @@ async function fetchFromMirror(
 
   const trusted = sig.trustedComment.toString();
   const match = /^timestamp:\d+\s+file:([^\s]+)\s+hashed$/.exec(trusted);
-  if (match === null || match[1] !== tarballFilename) {
-    throw new Error(`filename verification failed for ${tarballUrl}: trusted comment is '${trusted}'`);
+  if (match?.[1] !== tarballFilename) {
+    throw new Error(
+      `filename verification failed for ${tarballUrl}: trusted comment is '${trusted}'`,
+    );
   }
 
   return tarballData;

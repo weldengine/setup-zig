@@ -218,7 +218,10 @@ describe('downloadTarballWithKey', () => {
 
   it('rejects mirrors with a corrupted signature; race continues to a sound mirror', async () => {
     const badMirror = TEST_MIRRORS[0];
-    const corruptedSig = Buffer.concat([validSig.subarray(0, validSig.length - 8), Buffer.alloc(8)]);
+    const corruptedSig = Buffer.concat([
+      validSig.subarray(0, validSig.length - 8),
+      Buffer.alloc(8),
+    ]);
 
     vi.spyOn(globalThis, 'fetch').mockImplementation(async (urlInput) => {
       const url = String(urlInput);
@@ -302,7 +305,7 @@ describe('downloadTarballWithKey', () => {
     expect(FALLBACK_MIRRORS[0]).toBe('https://pkg.machengine.org/zig');
   });
 
-  it("rejects a mirror whose trusted comment names a different file", async () => {
+  it('rejects a mirror whose trusted comment names a different file', async () => {
     const wrongFilenameSig = signer.signTarball('zig-evil-payload-99.tar.xz', TARBALL_CONTENT);
 
     vi.spyOn(globalThis, 'fetch').mockImplementation(async (urlInput) => {

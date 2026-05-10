@@ -76024,7 +76024,7 @@ async function fetchFromMirror(mirror, tarballFilename, source, pubkey, signal) 
     }
     const trusted = sig.trustedComment.toString();
     const match = /^timestamp:\d+\s+file:([^\s]+)\s+hashed$/.exec(trusted);
-    if (match === null || match[1] !== tarballFilename) {
+    if (match?.[1] !== tarballFilename) {
         throw new Error(`filename verification failed for ${tarballUrl}: trusted comment is '${trusted}'`);
     }
     return tarballData;
@@ -76125,7 +76125,7 @@ async function main() {
         const tarballExt = (0, version_js_1.getTarballExt)(os.platform());
         const tarballFilename = `${tarballName}${tarballExt}`;
         const tarballCacheKey = (0, cache_js_1.getTarballCacheKey)(tarballFilename);
-        const runnerTemp = process.env['RUNNER_TEMP'] ?? os.tmpdir();
+        const runnerTemp = process.env.RUNNER_TEMP ?? os.tmpdir();
         const tarballPath = path.join(runnerTemp, tarballFilename);
         let usedTarballPath;
         const tarballHit = await cache.restoreCache([tarballPath], tarballCacheKey);
@@ -76162,14 +76162,14 @@ async function main() {
         const installedVersion = versionResult.stdout.trim();
         core.info(`Installed Zig version: ${installedVersion}`);
         core.setOutput('zig-version', installedVersion);
-        const zigCachePath = path.join(process.env['GITHUB_WORKSPACE'] ?? process.cwd(), '.zig-cache');
+        const zigCachePath = path.join(process.env.GITHUB_WORKSPACE ?? process.cwd(), '.zig-cache');
         core.exportVariable('ZIG_GLOBAL_CACHE_DIR', zigCachePath);
         core.exportVariable('ZIG_LOCAL_CACHE_DIR', zigCachePath);
         core.saveState('use-cache', useCache.toString());
         core.saveState('zig-cache-path', zigCachePath);
         core.saveState('cache-prefix', '');
         if (useCache) {
-            const jobName = process.env['GITHUB_JOB'] ?? 'job';
+            const jobName = process.env.GITHUB_JOB ?? 'job';
             const cachePrefix = (0, cache_js_1.getZigCachePrefix)(jobName, tarballName, cacheKey);
             core.info(`Restoring Zig cache with prefix '${cachePrefix}'`);
             const hit = await cache.restoreCache([zigCachePath], cachePrefix, (0, cache_js_1.getZigCacheRestoreKeys)(cachePrefix).slice());
@@ -76412,7 +76412,7 @@ async function getMasterVersion() {
     if (!isVersionMap(versions)) {
         throw new Error(`Malformed index.json from ${exports.VERSIONS_JSON}`);
     }
-    const master = versions['master'];
+    const master = versions.master;
     if (master === undefined) {
         throw new Error(`No 'master' entry in ${exports.VERSIONS_JSON}`);
     }
@@ -76501,19 +76501,19 @@ exports.getTarballExt = getTarballExt;
 const VERSION_RE = /^(?<major>\d+)\.(?<minor>\d+)\.(?<patch>\d+)(?:-dev\.(?<dev>\d+)\+[0-9a-f]*)?$/;
 function parseVersion(str) {
     const match = VERSION_RE.exec(str);
-    if (match === null || !match.groups)
+    if (!match?.groups)
         return null;
     const groups = match.groups;
-    const major = groups['major'];
-    const minor = groups['minor'];
-    const patch = groups['patch'];
+    const major = groups.major;
+    const minor = groups.minor;
+    const patch = groups.patch;
     if (major === undefined || minor === undefined || patch === undefined)
         return null;
     return {
         major: parseInt(major, 10),
         minor: parseInt(minor, 10),
         patch: parseInt(patch, 10),
-        dev: groups['dev'] === undefined ? null : parseInt(groups['dev'], 10),
+        dev: groups.dev === undefined ? null : parseInt(groups.dev, 10),
     };
 }
 function versionLessThan(curVer, minVer) {
@@ -76521,8 +76521,8 @@ function versionLessThan(curVer, minVer) {
     const min = parseVersion(minVer);
     if (cur === null || min === null)
         return false;
-    const curDev = cur.dev === null ? Infinity : cur.dev;
-    const minDev = min.dev === null ? Infinity : min.dev;
+    const curDev = cur.dev ?? Infinity;
+    const minDev = min.dev ?? Infinity;
     if (cur.major !== min.major)
         return cur.major < min.major;
     if (cur.minor !== min.minor)

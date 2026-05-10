@@ -78960,7 +78960,7 @@ async function post() {
                 `keeping contents intact`);
         }
         const runId = github.context.runId;
-        const runAttempt = parseInt(process.env['GITHUB_RUN_ATTEMPT'] ?? '1', 10);
+        const runAttempt = parseInt(process.env.GITHUB_RUN_ATTEMPT ?? '1', 10);
         const saveKey = (0, cache_js_1.getZigCacheSaveKey)(cachePrefix, runId, runAttempt);
         core.info(`Saving Zig cache with key '${saveKey}'`);
         try {

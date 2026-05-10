@@ -33,9 +33,7 @@ export async function resolveVersion(
     const abs = path.isAbsolute(versionFile) ? versionFile : path.join(cwd, versionFile);
     const fromZon = await readZonFromFile(abs, true);
     if (fromZon === null) {
-      throw new Error(
-        `No mach_zig_version or minimum_zig_version found in '${versionFile}'`,
-      );
+      throw new Error(`No mach_zig_version or minimum_zig_version found in '${versionFile}'`);
     }
     resolved = fromZon;
   } else {
@@ -96,7 +94,7 @@ export async function getMasterVersion(): Promise<string> {
   if (!isVersionMap(versions)) {
     throw new Error(`Malformed index.json from ${VERSIONS_JSON}`);
   }
-  const master = versions['master'];
+  const master = versions.master;
   if (master === undefined) {
     throw new Error(`No 'master' entry in ${VERSIONS_JSON}`);
   }
