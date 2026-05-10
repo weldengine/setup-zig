@@ -4,4 +4,5 @@
 
 dist/* linguist-generated=true
 dist/* -diff
+dist/* -text
 package-lock.json -diff
