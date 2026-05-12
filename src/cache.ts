@@ -17,7 +17,3 @@ export function getZigCachePrefix(jobName: string, tarballName: string, userKey:
 export function getZigCacheSaveKey(prefix: string, runId: number, runAttempt: number): string {
   return `${prefix}${runId.toString()}-${runAttempt.toString()}`;
 }
-
-export function getZigCacheRestoreKeys(prefix: string): readonly string[] {
-  return [prefix];
-}

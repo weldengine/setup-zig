@@ -68,7 +68,7 @@ export function parseSignature(sigBufIn: Buffer): ParsedSignature {
   let globalSigEnd = sigBuf.indexOf('\n');
   if (globalSigEnd === -1) globalSigEnd = sigBuf.length;
   const globalSignature = Buffer.from(sigBuf.subarray(0, globalSigEnd).toString(), 'base64');
-  sigBuf = sigBuf.subarray(sigInfoEnd + 1);
+  sigBuf = sigBuf.subarray(globalSigEnd + 1);
 
   if (sigBuf.length !== 0) {
     throw new Error('invalid minisign signature: trailing bytes');

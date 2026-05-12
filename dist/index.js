@@ -75847,7 +75847,6 @@ exports.getTarballCacheKey = getTarballCacheKey;
 exports.sanitizeJobName = sanitizeJobName;
 exports.getZigCachePrefix = getZigCachePrefix;
 exports.getZigCacheSaveKey = getZigCacheSaveKey;
-exports.getZigCacheRestoreKeys = getZigCacheRestoreKeys;
 const TARBALL_CACHE_NAMESPACE = 'weldengine-setup-zig-tarball-v1';
 const ZIG_CACHE_NAMESPACE = 'weldengine-setup-zig-zigcache-v1';
 function getTarballCacheKey(tarballBaseName) {
@@ -75862,9 +75861,6 @@ function getZigCachePrefix(jobName, tarballName, userKey) {
 }
 function getZigCacheSaveKey(prefix, runId, runAttempt) {
     return `${prefix}${runId.toString()}-${runAttempt.toString()}`;
-}
-function getZigCacheRestoreKeys(prefix) {
-    return [prefix];
 }
 
 
@@ -76127,11 +76123,9 @@ async function main() {
         const tarballCacheKey = (0, cache_js_1.getTarballCacheKey)(tarballFilename);
         const runnerTemp = process.env.RUNNER_TEMP ?? os.tmpdir();
         const tarballPath = path.join(runnerTemp, tarballFilename);
-        let usedTarballPath;
         const tarballHit = await cache.restoreCache([tarballPath], tarballCacheKey);
         if (tarballHit !== undefined) {
             core.info(`Tarball cache hit: ${tarballCacheKey}`);
-            usedTarballPath = tarballPath;
         }
         else {
             core.info(`Tarball cache miss; downloading ${tarballFilename} (source=${source})`);
@@ -76144,9 +76138,8 @@ async function main() {
                 destDir: runnerTemp,
             });
             core.info(`Downloaded from ${dlResult.mirrorUsed}`);
-            usedTarballPath = dlResult.tarballPath;
             try {
-                await cache.saveCache([usedTarballPath], tarballCacheKey);
+                await cache.saveCache([dlResult.tarballPath], tarballCacheKey);
             }
             catch (e) {
                 core.warning(`Failed to save tarball cache: ${String(e)}`);
@@ -76154,8 +76147,8 @@ async function main() {
         }
         core.info(`Extracting ${tarballFilename}`);
         const extractedParent = tarballExt === '.zip'
-            ? await tc.extractZip(usedTarballPath)
-            : await tc.extractTar(usedTarballPath, undefined, 'xJ');
+            ? await tc.extractZip(tarballPath)
+            : await tc.extractTar(tarballPath, undefined, 'xJ');
         const zigDir = path.join(extractedParent, tarballName);
         core.addPath(zigDir);
         const versionResult = await exec.getExecOutput('zig', ['version']);
@@ -76172,7 +76165,7 @@ async function main() {
             const jobName = process.env.GITHUB_JOB ?? 'job';
             const cachePrefix = (0, cache_js_1.getZigCachePrefix)(jobName, tarballName, cacheKey);
             core.info(`Restoring Zig cache with prefix '${cachePrefix}'`);
-            const hit = await cache.restoreCache([zigCachePath], cachePrefix, (0, cache_js_1.getZigCacheRestoreKeys)(cachePrefix).slice());
+            const hit = await cache.restoreCache([zigCachePath], cachePrefix, [cachePrefix]);
             if (hit === undefined) {
                 core.info('No Zig cache found; starting fresh');
             }
@@ -76249,7 +76242,7 @@ function parseSignature(sigBufIn) {
     if (globalSigEnd === -1)
         globalSigEnd = sigBuf.length;
     const globalSignature = node_buffer_1.Buffer.from(sigBuf.subarray(0, globalSigEnd).toString(), 'base64');
-    sigBuf = sigBuf.subarray(sigInfoEnd + 1);
+    sigBuf = sigBuf.subarray(globalSigEnd + 1);
     if (sigBuf.length !== 0) {
         throw new Error('invalid minisign signature: trailing bytes');
     }
@@ -76373,7 +76366,7 @@ async function resolveAlias(value) {
         return getMasterVersion();
     if (value === 'latest')
         return getLatestVersion();
-    if (value.includes('mach'))
+    if (value.endsWith('-mach'))
         return getMachVersion(value);
     return value;
 }

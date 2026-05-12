@@ -1,6 +1,5 @@
 import * as cache from '@actions/cache';
 import * as core from '@actions/core';
-import * as github from '@actions/github';
 import { getZigCacheSaveKey } from './cache.js';
 import { maybeGc, parseSizeLimit } from './gc.js';
 
@@ -35,7 +34,7 @@ async function post(): Promise<void> {
       );
     }
 
-    const runId = github.context.runId;
+    const runId = parseInt(process.env.GITHUB_RUN_ID ?? '0', 10);
     const runAttempt = parseInt(process.env.GITHUB_RUN_ATTEMPT ?? '1', 10);
     const saveKey = getZigCacheSaveKey(cachePrefix, runId, runAttempt);
 

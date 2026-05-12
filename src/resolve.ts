@@ -51,7 +51,7 @@ export async function resolveVersion(
 async function resolveAlias(value: string): Promise<string> {
   if (value === 'master') return getMasterVersion();
   if (value === 'latest') return getLatestVersion();
-  if (value.includes('mach')) return getMachVersion(value);
+  if (value.endsWith('-mach')) return getMachVersion(value);
   return value;
 }
 

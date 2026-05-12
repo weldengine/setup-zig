@@ -3,29 +3,22 @@ import * as path from 'node:path';
 
 const SIZE_RE = /^(\d+(?:\.\d+)?)\s*(B|KB|KiB|MB|MiB|GB|GiB|TB|TiB)$/i;
 
+const MULTIPLIERS: Readonly<Record<string, number>> = {
+  B: 1,
+  KB: 1000,
+  KIB: 1024,
+  MB: 1000 ** 2,
+  MIB: 1024 ** 2,
+  GB: 1000 ** 3,
+  GIB: 1024 ** 3,
+  TB: 1000 ** 4,
+  TIB: 1024 ** 4,
+};
+
 function getMultiplier(unit: string): number {
-  switch (unit.toUpperCase()) {
-    case 'B':
-      return 1;
-    case 'KB':
-      return 1000;
-    case 'KIB':
-      return 1024;
-    case 'MB':
-      return 1000 ** 2;
-    case 'MIB':
-      return 1024 ** 2;
-    case 'GB':
-      return 1000 ** 3;
-    case 'GIB':
-      return 1024 ** 3;
-    case 'TB':
-      return 1000 ** 4;
-    case 'TIB':
-      return 1024 ** 4;
-    default:
-      throw new Error(`Unknown unit: ${unit}`);
-  }
+  const m = MULTIPLIERS[unit.toUpperCase()];
+  if (m === undefined) throw new Error(`Unknown unit: ${unit}`);
+  return m;
 }
 
 export function parseSizeLimit(input: string | undefined): number | null {
@@ -62,18 +55,17 @@ export async function dirSize(dirPath: string): Promise<number> {
   } catch {
     return 0;
   }
-  let total = 0;
-  for (const ent of entries) {
-    if (!ent.isFile()) continue;
-    const p = path.join(ent.parentPath, ent.name);
-    try {
-      const stat = await fs.stat(p);
-      total += stat.size;
-    } catch {
-      // File disappeared between readdir and stat — skip
-    }
-  }
-  return total;
+  const sizes = await Promise.all(
+    entries
+      .filter((ent) => ent.isFile())
+      .map((ent) =>
+        fs.stat(path.join(ent.parentPath, ent.name)).then(
+          (s) => s.size,
+          () => 0,
+        ),
+      ),
+  );
+  return sizes.reduce((a, b) => a + b, 0);
 }
 
 export async function clearDirContents(dirPath: string): Promise<void> {
