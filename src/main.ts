@@ -4,7 +4,7 @@ import * as cache from '@actions/cache';
 import * as core from '@actions/core';
 import * as exec from '@actions/exec';
 import * as tc from '@actions/tool-cache';
-import { getTarballCacheKey, getZigCachePrefix, getZigCacheRestoreKeys } from './cache.js';
+import { getTarballCacheKey, getZigCachePrefix } from './cache.js';
 import { downloadTarball } from './download.js';
 import { resolveVersion } from './resolve.js';
 import { getTarballExt, getTarballName, getZigArch, getZigPlatform } from './version.js';
@@ -39,11 +39,9 @@ async function main(): Promise<void> {
     const runnerTemp = process.env.RUNNER_TEMP ?? os.tmpdir();
     const tarballPath = path.join(runnerTemp, tarballFilename);
 
-    let usedTarballPath: string;
     const tarballHit = await cache.restoreCache([tarballPath], tarballCacheKey);
     if (tarballHit !== undefined) {
       core.info(`Tarball cache hit: ${tarballCacheKey}`);
-      usedTarballPath = tarballPath;
     } else {
       core.info(`Tarball cache miss; downloading ${tarballFilename} (source=${source})`);
       core.debug(`download source query string: ${source}`);
@@ -55,10 +53,9 @@ async function main(): Promise<void> {
         destDir: runnerTemp,
       });
       core.info(`Downloaded from ${dlResult.mirrorUsed}`);
-      usedTarballPath = dlResult.tarballPath;
 
       try {
-        await cache.saveCache([usedTarballPath], tarballCacheKey);
+        await cache.saveCache([dlResult.tarballPath], tarballCacheKey);
       } catch (e) {
         core.warning(`Failed to save tarball cache: ${String(e)}`);
       }
@@ -67,8 +64,8 @@ async function main(): Promise<void> {
     core.info(`Extracting ${tarballFilename}`);
     const extractedParent =
       tarballExt === '.zip'
-        ? await tc.extractZip(usedTarballPath)
-        : await tc.extractTar(usedTarballPath, undefined, 'xJ');
+        ? await tc.extractZip(tarballPath)
+        : await tc.extractTar(tarballPath, undefined, 'xJ');
     const zigDir = path.join(extractedParent, tarballName);
 
     core.addPath(zigDir);
@@ -90,11 +87,7 @@ async function main(): Promise<void> {
       const jobName = process.env.GITHUB_JOB ?? 'job';
       const cachePrefix = getZigCachePrefix(jobName, tarballName, cacheKey);
       core.info(`Restoring Zig cache with prefix '${cachePrefix}'`);
-      const hit = await cache.restoreCache(
-        [zigCachePath],
-        cachePrefix,
-        getZigCacheRestoreKeys(cachePrefix).slice(),
-      );
+      const hit = await cache.restoreCache([zigCachePath], cachePrefix, [cachePrefix]);
       if (hit === undefined) {
         core.info('No Zig cache found; starting fresh');
       } else {

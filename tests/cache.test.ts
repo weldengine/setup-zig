@@ -2,7 +2,6 @@ import { describe, expect, it } from 'vitest';
 import {
   getTarballCacheKey,
   getZigCachePrefix,
-  getZigCacheRestoreKeys,
   getZigCacheSaveKey,
   sanitizeJobName,
 } from '../src/cache.js';
@@ -55,16 +54,5 @@ describe('getZigCacheSaveKey', () => {
   it('produces distinct keys for different attempts of the same run', () => {
     const prefix = 'p-';
     expect(getZigCacheSaveKey(prefix, 1, 1)).not.toBe(getZigCacheSaveKey(prefix, 1, 2));
-  });
-});
-
-describe('getZigCacheRestoreKeys', () => {
-  it('returns the prefix as the sole restore-key for prefix-matching', () => {
-    const prefix = 'weldengine-setup-zig-zigcache-v1-build-tarball-key-';
-    expect(getZigCacheRestoreKeys(prefix)).toEqual([prefix]);
-  });
-
-  it('uses an array so consumers can pass it directly to actions/cache', () => {
-    expect(Array.isArray(getZigCacheRestoreKeys('p-'))).toBe(true);
   });
 });
